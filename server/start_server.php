@@ -1,7 +1,5 @@
 <?php
 
-require_once('lib/Server.php');
-require_once('lib/Log.php');
+require_once('lib/Game.php');
 
-$Server = new Server(2000);
-$Server->start();
+Game::init();

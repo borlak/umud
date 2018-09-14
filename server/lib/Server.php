@@ -50,12 +50,12 @@ class Server {
 
         $this->id += 1;
 
-        $buffer = event_buffer_new($connection, 'Server::read', NULL, 'Server::error', $descriptor);
+        $buffer = event_buffer_new($connection, 'Server::read', 'Server::write', 'Server::error', $descriptor);
         event_buffer_base_set($buffer, $base);
         event_buffer_timeout_set($buffer, 30, 30);
         event_buffer_watermark_set($buffer, EV_READ, 0, 0xffffff);
         event_buffer_priority_set($buffer, 10);
-        event_buffer_enable($buffer, EV_READ | EV_PERSIST);
+        event_buffer_enable($buffer, EV_READ | EV_WRITE | EV_PERSIST);
 
         $this->connections[$descriptor] = $connection;
         $this->buffers[$descriptor] = $buffer;
@@ -67,11 +67,26 @@ class Server {
         $this->close($id);
     }
 
+    private function getBuffer($id) {
+        return isset($this->buffers[$id]) ? $this->buffers[$id] : false;
+    }
+
     private function read($buffer, $id) {
         while($read = event_buffer_read($buffer, 256)) {
-    //        var_dump($read);
-            $this->close($id);
+            var_dump($read);
+            $this->write("Got yo message", $id);
+        }
+    }
+
+    private function write($message, $id) {
+        if(($buffer = $this->getBuffer($id)) === false) {
             return;
         }
+
+        if(!is_string($message) || empty($message)) {
+            return;
+        }
+
+        event_buffer_write($buffer, $message);
     }
 }

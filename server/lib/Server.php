@@ -1,7 +1,5 @@
 <?php
 
-require_once('Game.php');
-
 class Server {
     private $port = null;
     private $socket = null;
@@ -9,7 +7,6 @@ class Server {
     private $event = null;
     private $connections = null;
     private $buffers = null;
-    private $id = 10;
 
     function __construct($port) {
         $this->port = $port;
@@ -31,15 +28,15 @@ class Server {
 
     /**
      * Close a connection and clear buffers.
-     * @param int $connection_id
+     * @param int $id
      */
-    public function close($connection_id) {
-        Game::getInstance()->removeConnection($connection_id);
+    public function close(int $id) {
+        Game::getInstance()->removeConnection($id);
 
-        event_buffer_disable($this->buffers[$connection_id], EV_READ | EV_WRITE);
-        event_buffer_free($this->buffers[$connection_id]);
-        fclose($this->connections[$connection_id]);
-        unset($this->buffers[$connection_id], $this->connections[$connection_id]);
+        event_buffer_disable($this->buffers[$id], EV_READ | EV_WRITE);
+        event_buffer_free($this->buffers[$id]);
+        fclose($this->connections[$id]);
+        unset($this->buffers[$id], $this->connections[$id]);
     }
 
     public function accept($socket, $flag, $base) {
@@ -47,8 +44,6 @@ class Server {
         $stat = fstat($connection);
         $descriptor = $stat['ino'];
         stream_set_blocking($connection, 0);
-
-        $this->id += 1;
 
         $buffer = event_buffer_new($connection, 'Server::read', 'Server::write', 'Server::error', $descriptor);
         event_buffer_base_set($buffer, $base);
@@ -63,30 +58,36 @@ class Server {
         Game::getInstance()->newConnection($descriptor);
     }
 
-    private function error($buffer, $error, $id) {
+    private function error($buffer, $error, int $id) {
         $this->close($id);
     }
 
-    private function getBuffer($id) {
+    private function getBuffer(int $id) {
         return isset($this->buffers[$id]) ? $this->buffers[$id] : false;
     }
 
-    private function read($buffer, $id) {
+    public function read($buffer, int $id) {
+echo "in read\n";
         while($read = event_buffer_read($buffer, 256)) {
             var_dump($read);
             $this->write("Got yo message", $id);
         }
     }
 
-    private function write($message, $id) {
+    /**
+     * Write a string to a descriptor
+     * @return boolean success
+     */
+    public function write(string $message, int $id) {
         if(($buffer = $this->getBuffer($id)) === false) {
-            return;
+            return false;
         }
 
         if(!is_string($message) || empty($message)) {
-            return;
+            return false;
         }
 
         event_buffer_write($buffer, $message);
+        return true;
     }
 }

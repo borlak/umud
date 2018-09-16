@@ -1,16 +1,12 @@
 <?php
 
-require_once('Log.php');
-require_once('BConnection.php');
-require_once('Server.php');
-
 class Game {
     /**
      * @var Game
      */
     private static $instance = null;
     /**
-     * @var array BConnection
+     * @var array Conn
      */
     private $connections;
     /**
@@ -28,6 +24,9 @@ class Game {
     // for singleton pattern
     private function __wakeup() {
     }
+    /**
+     * @return Game
+     */
     public static function getInstance()
     {
         if(!isset(self::$instance)) {
@@ -48,7 +47,7 @@ class Game {
     }
 
     /**
-     * Sets up the Server that processes connections.  Needed for calling write() from the BConnections
+     * Sets up the Server that processes connections.  Needed for calling write() from the Connections
      * @param Server $server
      */
     public function setServer($server) {
@@ -56,12 +55,10 @@ class Game {
     }
 
     public function newConnection($id) {
-        $connection = new BConnection($id, $this->server);
-        $connection->setState(BConnection::STATE_CONNECTED);
+        $connection = new Conn($id, $this->server);
+        $connection->setState(Conn::STATE_CONNECTED);
         $this->connections[] = $connection;
-        $connection->send(
-            'some json containing commands available, maybe a message'
-        );
+        $connection->send('Welcome to the game');
         Log::log("New connection $id");
     }
 

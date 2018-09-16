@@ -1,4 +1,5 @@
 <?php
+
 class Log {
     /**
      * @var Log
@@ -14,6 +15,9 @@ class Log {
     // for singleton pattern
     private function __wakeup() {
     }
+    /**
+     * @return Log
+     */
     public static function log($mesg)
     {
         echo $mesg.PHP_EOL;

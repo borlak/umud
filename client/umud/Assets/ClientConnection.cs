@@ -35,7 +35,7 @@ public class ClientConnection : MonoBehaviour {
 
     private void ListenForData() {
         try {
-            socket = new TcpClient("192.168.57.3", 2000);
+            socket = new TcpClient("192.168.58.3", 2000);
             Byte[] bytes = new Byte[1024];
             while(true) {
                 using(NetworkStream stream = socket.GetStream()) {

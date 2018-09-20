@@ -6,19 +6,33 @@ class Conn {
 
     private $id;
     private $state;
-    /**
-     * @var Server
-     */
-    private $server;
+    private $base;
+    private $bev; // EventBufferEvent
 
     /**
      * @param int $id descriptor
      * @param Lib\Server $server
      */
-    function __construct(int $id, Server $server) {
-        $this->id = $id;
+    function __construct($base, $fd) {
+        $this->id = $fd;
         $this->state = self::STATE_NONE;
-        $this->server = $server;
+        $this->base = $base;
+
+        $this->bev = new EventBufferEvent($base, $fd, EventBufferEvent::OPT_CLOSE_ON_FREE);
+
+        $this->bev->setCallbacks(
+            array($this, 'read'), NULL,
+            array($this, 'error'), NULL
+        );
+
+        if (!$this->bev->enable(Event::READ)) {
+            echo "Failed to enable READ\n";
+            return;
+        }
+    }
+
+    public function __destruct() {
+        $this->bev->free();
     }
 
     /**
@@ -36,10 +50,23 @@ class Conn {
         $this->state = $state;
     }
 
-    /**
-     * Send a message/string to the connection.
-     */
+    public function read($bev, $ctx) {
+        $input  = $bev->getInput();
+var_export($text);
+        $output = $bev->getOutput();
+        $output->addBuffer($input);
+    }
+
     public function send(string $message) {
-        return $this->server->write($message, $this->id);
+    }
+
+    public function error($bev, $events, $ctx) {
+        if($events & EventBufferEvent::ERROR) {
+            echo "Error from bufferevent for descriptor {$this->id}\n";
+        }
+
+        if ($events & (EventBufferEvent::EOF | EventBufferEvent::ERROR)) {
+            $this->__destruct();
+        }
     }
 }

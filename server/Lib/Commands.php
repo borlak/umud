@@ -10,6 +10,9 @@ class Commands {
     // for singleton pattern
     private function __wakeup() {
     }
+    /**
+     * @return Commands
+     */
     public static function getInstance()
     {
         if(!isset(self::$instance)) {

@@ -14,9 +14,9 @@ class Game {
      */
     private $server;
     /**
-     * @var Map[]
+     * @var Area[]
      */
-    private $maps;
+    private $areas;
 
     // protected for singleton pattern
     protected function __construct() {
@@ -47,9 +47,9 @@ class Game {
         $Game = new Game();
         self::$instance = $Game;
 
-        // Load Maps/Areas
+        // Load Areas
         for($x = 0; $x < 50; $x++) {
-            $Game->addMap(new Map());
+            $Game->addArea(new Area());
         }
         Log::log(Log::DEBUG, "Total rooms loaded: ".$Game->roomCount());
 
@@ -67,8 +67,8 @@ class Game {
         $this->server = $server;
     }
 
-    public function addMap(Map $map) {
-        $this->maps[] = $map;
+    public function addArea(Area $area) {
+        $this->areas[] = $area;
     }
 
     /**
@@ -77,8 +77,8 @@ class Game {
      */
     public function roomCount() {
         $total = 0;
-        foreach($this->maps as $map) {
-            $total += $map->roomCount();
+        foreach($this->areas as $area) {
+            $total += $area->roomCount();
         }
         return $total;
     }

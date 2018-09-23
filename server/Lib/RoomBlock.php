@@ -2,9 +2,9 @@
 // This is a block which contains x by x rooms
 class RoomBlock {
     /**
-     * @var Map
+     * @var Area
      */
-    private $map;
+    private $area;
     /**
      * @var Room[]
      */
@@ -12,10 +12,10 @@ class RoomBlock {
     private $max_x;
     private $max_y;
 
-    public function __construct($map, $room_x=25, $room_y=25) {
+    public function __construct($area, $room_x=25, $room_y=25) {
         $this->max_x = $room_x;
         $this->max_y = $room_y;
-        $this->map = $map;
+        $this->area = $area;
         $this->rooms = array();
         for($x = 0; $x < $room_x; $x++) {
             $this->rooms[$x] = array();

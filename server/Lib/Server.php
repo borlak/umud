@@ -20,7 +20,8 @@ class Server {
         $this->base = new EventBase();
         $this->server = new EventListener(
             $this->base,
-            array($this,'accept'), $this->base,
+            array($this,'accept'),
+            $this->base,
             EventListener::OPT_CLOSE_ON_FREE | EventListener::OPT_REUSEABLE, -1,
             "0.0.0.0:{$this->port}"
         );
@@ -43,9 +44,10 @@ class Server {
     public function error($server, $ctx) {
         $base = $this->base;
 
-        fprintf(STDERR, "Got an error %d (%s) on the listener. Shutting down.\n",
+        Log::log(Log::ERROR, "Got an error %d (%s) on the listener. Shutting down.\n",
             EventUtil::getLastSocketErrno(),
-            EventUtil::getLastSocketError());
+            EventUtil::getLastSocketError()
+        );
 
         $base->exit(NULL);
     }

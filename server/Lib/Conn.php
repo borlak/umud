@@ -7,7 +7,10 @@ class Conn {
     private $id;
     private $state;
     private $base;
-    private $bev; // EventBufferEvent
+    /**
+     * @var EventBufferEvent
+     */
+    private $bev;
 
     /**
      * @param int $id descriptor
@@ -21,8 +24,10 @@ class Conn {
         $this->bev = new EventBufferEvent($base, $fd, EventBufferEvent::OPT_CLOSE_ON_FREE);
 
         $this->bev->setCallbacks(
-            array($this, 'read'), NULL,
-            array($this, 'error'), NULL
+            array($this, 'read'),
+            NULL,
+            array($this, 'error'),
+            NULL
         );
 
         if (!$this->bev->enable(Event::READ)) {
@@ -50,14 +55,18 @@ class Conn {
         $this->state = $state;
     }
 
-    public function read($bev, $ctx) {
-        $input  = $bev->getInput();
-var_export($text);
-        $output = $bev->getOutput();
-        $output->addBuffer($input);
+    public function read($bev, $arg) {
+        $read = '';
+        while(strlen($text = $bev->read(1024))) {
+            $read .= $text;
+        }
+        Log::log(Log::DEBUG, "Socket $this->id read: $read\n");
+        return $read;
     }
 
-    public function send(string $message) {
+    public function write($string) {
+        Log::log(Log::DEBUG, "Socket $this->id writing: $string\n");
+        return $this->bev->write($string);
     }
 
     public function error($bev, $events, $ctx) {
@@ -65,7 +74,8 @@ var_export($text);
             echo "Error from bufferevent for descriptor {$this->id}\n";
         }
 
-        if ($events & (EventBufferEvent::EOF | EventBufferEvent::ERROR)) {
+        if ($events & (EventBufferEvent::EOF | EventBufferEvent::ERROR | EventBufferEvent::TIMEOUT)) {
+            echo "{$this->id} disconnects\n";
             $this->__destruct();
         }
     }

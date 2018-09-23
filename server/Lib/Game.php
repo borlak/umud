@@ -6,13 +6,17 @@ class Game {
      */
     private static $instance = null;
     /**
-     * @var array Conn
+     * @var Conn[]
      */
     private $connections;
     /**
      * @var Server
      */
     private $server;
+    /**
+     * @var Map[]
+     */
+    private $maps;
 
     // protected for singleton pattern
     protected function __construct() {
@@ -39,9 +43,18 @@ class Game {
      * Initialize the Game.  Start the Server which accepts connections.
      */
     public static function init() {
-        $Server = new Server(2000);
+        // Initialize singleton
         $Game = new Game();
         self::$instance = $Game;
+
+        // Load Maps/Areas
+        for($x = 0; $x < 50; $x++) {
+            $Game->addMap(new Map());
+        }
+        Log::log(Log::DEBUG, "Total rooms loaded: ".$Game->roomCount());
+
+        // Start the socket server
+        $Server = new Server(2000);
         $Game->setServer($Server);
         $Server->start();
     }
@@ -54,16 +67,32 @@ class Game {
         $this->server = $server;
     }
 
+    public function addMap(Map $map) {
+        $this->maps[] = $map;
+    }
+
+    /**
+     * Get total number of rooms for the Game.
+     * @return int
+     */
+    public function roomCount() {
+        $total = 0;
+        foreach($this->maps as $map) {
+            $total += $map->roomCount();
+        }
+        return $total;
+    }
+
     public function newConnection($id) {
         $connection = new Conn($id, $this->server);
         $connection->setState(Conn::STATE_CONNECTED);
         $this->connections[] = $connection;
         $connection->send('Welcome to the game');
-        Log::log("New connection $id");
+        Log::log(Log::DEBUG, "New connection $id");
     }
 
     public function removeConnection($id) {
         unset($this->connections[$id]);
-        Log::log("Lost connection $id");
+        Log::log(Log::DEBUG, "Lost connection $id");
     }
 }

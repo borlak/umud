@@ -9,20 +9,32 @@ class RoomBlock {
      * @var Room[]
      */
     private $rooms;
-    private $max_x;
-    private $max_y;
+    /**
+     * How big this block is for each axis (x and y).  Blocks have to be square.
+     * @var int
+     */
+    private $block_size = BLOCK_SIZE;
 
-    public function __construct($area, $room_x=25, $room_y=25) {
-        $this->max_x = $room_x;
-        $this->max_y = $room_y;
+    public function __construct($area, $block_size=25) {
+        $this->block_size = $block_size;
         $this->area = $area;
         $this->rooms = array();
-        for($x = 0; $x < $room_x; $x++) {
+        for($x = 0; $x < $block_size; $x++) {
             $this->rooms[$x] = array();
-            for($y = 0; $y < $room_y; $y++) {
-                $this->rooms[$x][$y] = new Room($this);
+            for($y = 0; $y < $block_size; $y++) {
+                $this->rooms[$x][$y] = new Room();
             }
         }
+    }
+
+    /**
+     * Return a specific room within the block.
+     * @param int $x
+     * @param int $y
+     * @return Room
+     */
+    public function getRoom($x, $y) {
+        return $this->rooms[$x][$y];
     }
 
     /**
@@ -30,6 +42,6 @@ class RoomBlock {
      * @return int
      */
     public function roomCount() {
-        return $this->max_x * $this->max_y;
+        return BLOCK_SIZE*BLOCK_SIZE;
     }
 }

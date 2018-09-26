@@ -1,11 +1,20 @@
 <?php
 class Room {
     /**
-     * @var RoomBlock
+     * @var Mobile[]
      */
-    private $block;
+    private $mobiles = array();
+    /**
+     * @var Object[]
+     */
+    private $objects = array();
+    private $type = 0;
 
-    public function __construct($block) {
-        $this->block = $block;
+    public function __construct() {
+        $this->type = rand(1,99);
+    }
+
+    public function getType() {
+        return $this->type;
     }
 }

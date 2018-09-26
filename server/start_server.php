@@ -1,5 +1,7 @@
 <?php
 
+require_once('Lib/Constants.php');
+
 Log::create(Log::DEBUG);
 Game::init();
 

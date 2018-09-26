@@ -48,10 +48,17 @@ class Game {
         self::$instance = $Game;
 
         // Load Areas
-        for($x = 0; $x < 50; $x++) {
+        for($x = 0; $x < 40; $x++) {
             $Game->addArea(new Area());
         }
         Log::log(Log::DEBUG, "Total rooms loaded: ".$Game->roomCount());
+
+        echo "Current PHP Memory usage:".memory_get_usage().PHP_EOL;
+
+        $Area = $Game->getArea(0);
+        $map = $Area->getMap(20,20,20,20);
+        $Area->drawAsciiMap($map);
+        die;
 
         // Start the socket server
         $Server = new Server(2000);
@@ -65,6 +72,13 @@ class Game {
      */
     public function setServer($server) {
         $this->server = $server;
+    }
+
+    /**
+     * @return Area
+     */
+    public function getArea($index) {
+        return $this->areas[$index];
     }
 
     public function addArea(Area $area) {
